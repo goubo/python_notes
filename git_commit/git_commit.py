@@ -22,7 +22,7 @@ def git_commit(date):
         commit_count += deviation
     else:
         commit_count -= deviation
-    print(os.system("cd " + git_path + "& ls"))
+    print(os.system("cd " + git_path + "& pwd"))
     os.system("cd " + git_path)
     os.system("md5 " + md5_path + " > " + md5_path)
     os.system("git add .")
