@@ -22,8 +22,9 @@ def git_commit(date):
         commit_count += deviation
     else:
         commit_count -= deviation
+    os.system("cd " + git_path)
     os.system("md5 " + md5_path + " > " + md5_path)
-    os.system("git add " + md5_path)
+    os.system("git add .")
     os.system('git commit -a -m "1" --date ' + date)
 
 
