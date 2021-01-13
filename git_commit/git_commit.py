@@ -2,15 +2,15 @@ import random
 import os
 import datetime
 
-start = "2020-01-01"
+start = "2020-02-01"
 end = "2020-12-31"
-
+git_path = "/Users/bobo/my/java-tool"
 week_commit_probability = [80, 80, 80, 80, 80, 60, 40]
 
 commit_num = 30
 deviation = 10
 
-git_path = "/Users/bobo/my/java-tool"
+os.chdir(git_path)
 
 
 def git_commit(date):
@@ -22,11 +22,11 @@ def git_commit(date):
         commit_count += deviation
     else:
         commit_count -= deviation
-    print(os.system("cd " + git_path + "& pwd"))
-    os.system("cd " + git_path)
-    os.system("md5 " + md5_path + " > " + md5_path)
-    os.system("git add .")
-    os.system('git commit -a -m "1" --date ' + date)
+    for num in range(0, commit_count):
+        os.system("pwd")
+        os.system("echo '{}_{}' > md5".format(date, num))
+        os.system("git add .")
+        os.system('git commit -a -m "{}_{}" --date {}'.format(date, num, date))
 
 
 def gen_commit_date():
@@ -45,7 +45,7 @@ def gen_commit_date():
 
     while start_time < end_time:
         if random_index(week_commit_probability[start_time.weekday()]):
-            print(start_time)
+            git_commit(start_time)
         start_time += datetime.timedelta(days=1)
 
 
@@ -54,6 +54,4 @@ def random_index(rate):
 
 
 if __name__ == '__main__':
-    git_commit("2020-10-24")
-# print(datetime.date.today().weekday())
-# gen_commit_date()
+    gen_commit_date()
