@@ -1,3 +1,4 @@
 import main_window
 
-main_window.show()
+if __name__ == '__main__':
+    main_window.show()
