@@ -159,7 +159,7 @@ def show(main_window):
 
     def select_path():
         file_path = askopenfilename(title='Select the diagnostic instrument .jpeg file',
-                                    filetypes=[('jpeg', ('.jpeg', '.png', '.jpg', '.gif'))])
+                                    filetypes=[('图片', ('.jpeg', '.png', '.jpg', '.gif'))])
         if file_path:
             path.set(file_path)
             show_canvas_window(path.get())
@@ -170,7 +170,7 @@ def show(main_window):
     e.bind('<KeyRelease>', reset_config)
     e.grid(row=2, column=1, columnspan=3)
 
-    Label(window, text='字号:').grid(row=2, column=0)
+    Label(window, text='字号:').grid(row=3, column=0)
     fond_size_scale = Scale(window, orient=HORIZONTAL, from_=3, to=200, relief='flat', sliderrelief='flat', length=200,
                             command=set_font_size)
     fond_size_scale.set(fondSizeVal.get())
