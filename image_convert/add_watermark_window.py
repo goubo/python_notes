@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 from numpy import array
 
-from image_convert import utils
+import utils
 
 show_flag = False
 show_image = False
@@ -40,7 +40,9 @@ def reset_config(*v):
     if not show_image:
         return
     global image, logo
-    font = ImageFont.truetype('SimHei.ttf', fondSizeVal.get())
+    filename = utils.resource_path(os.path.join("res", "SimHei.ttf"))
+    print(filename)
+    font = ImageFont.truetype(filename, fondSizeVal.get())
     logo = Image.new('RGBA', font.getsize(textVar.get()))
     draw = ImageDraw.Draw(logo)
     test = color_rgb + (alphaVal.get(),)
@@ -210,7 +212,6 @@ def show(main_window):
     Radiobutton(window, text='中下', variable=sticky, value='s', comman=reset_offset).grid(row=9, column=2)
     Radiobutton(window, text='右下', variable=sticky, value='se', comman=reset_offset).grid(row=9, column=3)
 
-    # Button(window, text="水印信息", command=print_info).grid(row=9, column=1)
     Button(window, text="导入水印", command=import_info).grid(row=10, column=2)
     Button(window, text="保存水印", command=save_info).grid(row=10, column=3)
     Button(window, text="保存图片", command=save_image).grid(row=11, column=3)
@@ -252,8 +253,7 @@ def import_info():
     file_path = askopenfilename(title='Select the diagnostic instrument .jpeg file',
                                 filetypes=[('wark', '*.wark')])
     if file_path:
-        str = open(file_path, 'r').read()
-        info = json.loads(str)
+        info = json.loads(open(file_path, 'r').read())
         textVar.set(info['textVar'])
         sticky.set(info['sticky'])
         fondSizeVal.set(info['fondSizeVal'])

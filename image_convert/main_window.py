@@ -1,6 +1,6 @@
 from tkinter import Tk, Button
 
-from image_convert import add_watermark_window
+import add_watermark_window
 
 INIT_WINDOW = Tk()
 
