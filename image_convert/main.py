@@ -1,4 +1,4 @@
-import main_window
+import main_windows
 
 if __name__ == '__main__':
-    main_window.show()
+    main_windows.show()
