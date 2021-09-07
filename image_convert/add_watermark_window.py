@@ -159,8 +159,7 @@ def show(main_window):
 
     def select_path():
         file_path = askopenfilename(title='Select the diagnostic instrument .jpeg file',
-                                    filetypes=[('jpeg', '*.jpeg'), ('jpg', '*.jpg'), ('png', '*.png'),
-                                               ('gif', '*.gif')])
+                                    filetypes=[('jpeg', ('.jpeg', '.png', '.jpg', '.gif'))])
         if file_path:
             path.set(file_path)
             show_canvas_window(path.get())
@@ -239,7 +238,7 @@ def save_image():
 
 
 def save_info():
-    desk = os.path.join(os.path.expanduser('~'), 'Desktop', datetime.datetime.now().__str__() + '.wark')
+    desk = os.path.join(os.path.expanduser('~'), 'Desktop', datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + '.wark')
     info = {'textVar': textVar.get(), 'sticky': sticky.get(), 'rel_xy': rel_xy.tolist(),
             'fondSizeVal': fondSizeVal.get(),
             'color': color_rgb, 'angleVal': angleVal.get(), 'alphaVal': alphaVal.get()}
@@ -250,7 +249,7 @@ def save_info():
 
 def import_info():
     global rel_xy, color_rgb, show_xy
-    file_path = askopenfilename(title='Select the diagnostic instrument .jpeg file',
+    file_path = askopenfilename(title='选择水印文件',
                                 filetypes=[('wark', '*.wark')])
     if file_path:
         info = json.loads(open(file_path, 'r').read())
