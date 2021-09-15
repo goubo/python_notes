@@ -109,11 +109,11 @@ def set_alpha(v):
     reset_config()
 
 
-def show_canvas_window(path):
+def show_canvas_window(image_path):
     global image, image_res, show_xy, show_image
     show_image = True
     cv2.destroyAllWindows()
-    image_res = Image.open(path)
+    image_res = Image.open(image_path)
     image = np.array(image_res)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     cv2.imshow('预览', image)
@@ -126,7 +126,8 @@ def show_canvas_window(path):
 
 
 def show(main_window):
-    global show_flag, textVar, sticky, fondSizeVal, rgbVal, angleVal, color_rgb, alphaVal, path, fond_size_scale, angle_scale, alpha_scale
+    global show_flag, textVar, sticky, fondSizeVal, rgbVal, angleVal, color_rgb, alphaVal, path, fond_size_scale, \
+        angle_scale, alpha_scale
     path = StringVar()
     textVar = StringVar()
     sticky = StringVar()

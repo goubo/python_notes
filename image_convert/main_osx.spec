@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
-#  pyi-makespec -F -w main.py
+#  pyi-makespec -F -w get_temp.py
 #  pyinstaller -F main.spec
 
 

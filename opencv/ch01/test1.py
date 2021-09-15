@@ -6,5 +6,5 @@ k = cv2.waitKey(0)
 if k == 27:
     cv2.destroyAllWindows()  # wait for ESC key to exit
 elif k == ord('s'):
-    cv2.imwrite('save.png', img)  # wait for 's' key to save and exit
+    cv2.imwrite('save.png', img, [cv2.IMWRITE_PNG_COMPRESSION, 50])  # wait for 's' key to save and exit
 cv2.destoryAllWindows()
