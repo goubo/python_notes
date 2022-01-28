@@ -2,7 +2,6 @@ import sys
 
 from PyQt6 import QtWidgets
 
-from constant import service
 from ui_windows import MainWindowWidget
 
 if __name__ == '__main__':
