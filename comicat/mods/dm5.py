@@ -12,13 +12,18 @@ from mods.website_interface import WebsiteInterface
 
 class DM5Comicat(WebsiteInterface):
 
+    def __init__(self):
+        self.webSiteName = "dm5"
+        self.searchUrl = "https://www.dm5.com/search?title={}"
+        self.domain = "https://www.dm5.com"
+        self.headers = {'Host': 'www.dm5.com',
+                        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
+                                      'like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+                        }
+
     def down_image(self, image_info) -> bytes:
-        headers = {
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/97.0.4692.99 Safari/537.36',
-            'referer': 'https://www.dm5.com{}'.format(image_info['dm5Curl'])
-        }
-        response = requests.get(image_info.url, headers=headers)
+        self.headers['referer'] = 'https://www.dm5.com{}'.format(image_info['dm5Curl'])
+        response = requests.get(image_info.url, headers=self.headers)
         if response.status_code == 200:
             return response.content
         else:
@@ -26,33 +31,33 @@ class DM5Comicat(WebsiteInterface):
 
     def parse_image_list(self, chapter_info) -> List[ImageInfo]:
         image_list = []
-        response = etree.HTML(requests.get(chapter_info.url).text)
+        req = requests.Session()
+        response = req.get(chapter_info.url, headers=self.headers)
+        self.headers['Referer'] = chapter_info.url
         cid = re.findall('var DM5_CID=(.+?);', response.text)[0].strip()
         page_count = re.findall('var DM5_IMAGE_COUNT=(.+?);', response.text)[0].strip()
         mid = re.findall('var DM5_MID=(.+?);', response.text)[0].strip()
         dt = re.findall('var DM5_VIEWSIGN_DT="(.+?)";', response.text)[0].strip()
+        dt = dt.replace(" ", "+").replace(":", "%3A")
         sign = re.findall('var DM5_VIEWSIGN="(.*?)";', response.text)[0].strip()
-        dm5Curl = re.findall('var DM5_CURL = "(.*?)";', response.text)[0].strip()
+        dm5_curl = re.findall('var DM5_CURL = "(.*?)";', response.text)[0].strip()
         for page in range(1, int(page_count) + 1):
-            chapterfun_url = "{}/chapterfun.ashx?cid={}&page={}&key=&language=1&gtk=6&_cid={}&_mid={}&_dt={}&_sign={}" \
-                .format(response.url, cid, page, cid, mid, dt, sign)
-            response = requests.get(chapterfun_url)
+            chapter_fun_url = "{}chapterfun.ashx?cid={}&page={}&key=&language=1&gtk=6&_cid={}&_mid={}&_dt={}&_sign={}" \
+                .format(chapter_info.url, cid, page, cid, mid, dt, sign)
+            print(chapter_fun_url)
+            response = req.get(chapter_fun_url, headers=self.headers)
             js = execjs.eval(response.text)
             info = ImageInfo()
             info.url = js[0]
-            info['dm5Curl'] = dm5Curl
+            info['dm5Curl'] = dm5_curl
             image_list.append(info)
+
         return image_list
 
     def chapter_callback(self, comic_info: ComicInfo, callback):
         for chapter_info in comic_info.chapterList:
             callback(chapter_info)
         return comic_info.chapterList
-
-    def __init__(self):
-        self.webSiteName = "dm5"
-        self.searchUrl = "https://www.dm5.com/search?title={}"
-        self.domain = "https://www.dm5.com"
 
     def search_callback(self, key, callback) -> list[ComicInfo]:
         comic_info_list: List[ComicInfo] = []
@@ -107,16 +112,18 @@ class DM5Comicat(WebsiteInterface):
 
 if __name__ == '__main__':
     s = DM5Comicat()
+    chapterinfo = ChapterInfo()
+    chapterinfo.url = "https://www.dm5.com/m518896/"
+    s.parse_image_list(chapterinfo)
 
 
     def test(info):
         pass
 
-
-    l = s.search_callback("龙珠", test)
-    for c in l:
-        c: ComicInfo
-        print(c.title)
-        print(c.url)
-        print(c.author)
-        print(c.describe)
+    # l = s.search_callback("龙珠", test)
+    # for c in l:
+    #     c: ComicInfo
+    #     print(c.title)
+    #     print(c.url)
+    #     print(c.author)
+    #     print(c.describe)

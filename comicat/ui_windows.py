@@ -101,7 +101,7 @@ class UIComicInfoWidget(QWidget):
         self.down_button.setText("下载")
         self.down_button.setGeometry(780, 605, 50, 30)
 
-        self.down_button.clicked.connect(self.download)
+        self.down_button.clicked.connect(self.download_button_click)
 
         self.load_chapter_list_signa.connect(self.load_chapter)
 
@@ -116,15 +116,14 @@ class UIComicInfoWidget(QWidget):
         for check_box in self.check_box_list:
             check_box.setChecked(self.check_all.isChecked())
 
-    def download(self):
+    def download_button_click(self):
         flag = False
         for check_box in self.check_box_list:
             if check_box.isChecked():
-                service.parse_download(self.comic_info, check_box.property("chapter_info"))
-                flag = True
-
-        if flag:
-            QMessageBox.information(self, "下载通知", "正在解析选中章节", QMessageBox.StandardButton.Yes)
+                service.parse_image(self.comic_info, check_box.property("chapter_info"))
+                if not flag:
+                    QMessageBox.information(self, "下载通知", "正在解析选中章节", QMessageBox.StandardButton.Yes)
+                    flag = True
 
     def load_chapter(self, chapter_info: ChapterInfo):
         if self.i % 23 == 0:

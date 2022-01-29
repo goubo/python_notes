@@ -43,18 +43,12 @@ class Service(object):
     def chapter(self, comic_info: ComicInfo, callback):
         threading.Thread(target=self.chapter_thread, args=(comic_info, callback)).start()
 
-    def parse_download(self, comic_info: ComicInfo, chapter_info: ChapterInfo):
-        print("解析下载页面")
+    def parse_image_thread(self, comic_info: ComicInfo, chapter_info: ChapterInfo):
+        service = comic_info.service
+        service: WebsiteInterface
+        list = service.parse_image_list(chapter_info)
+        print(len(list))
+        print(list)
 
-
-if __name__ == '__main__':
-    found_class_dict = find_database_access_class("comicat", "mods")
-    for class_name, class_ in found_class_dict.items():
-        class_: WebsiteInterface
-        l = class_().search("龙珠")
-        for c in l:
-            c: ComicInfo
-            print(c.title)
-            print(c.url)
-            print(c.author)
-            print(c.describe)
+    def parse_image(self, comic_info: ComicInfo, chapter_info: ChapterInfo):
+        threading.Thread(target=self.parse_image_thread, args=(comic_info, chapter_info)).start()
