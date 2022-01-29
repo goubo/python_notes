@@ -25,25 +25,71 @@ class DownLoadTaskWidget(QWidget):
         self.title.setGeometry(10, 5, 300, 20)
         # 下载进度
         self.schedule = QLabel(self.groupBox)
-        self.schedule.setText("总页数:{}  已下载:{}  下载失败:{}".format(len(task.imageInfos), len(task.success),
-                                                               len(task.error)))
+        self.schedule.setText(
+            f"总页数:{len(self.task.imageInfos)}  已下载:{len(self.task.success)}  下载失败:{len(self.task.error)}")
         self.schedule.setGeometry(310, 5, 200, 20)
-        # 状态
+        # 进度条
         self.pbar = QProgressBar(self.groupBox)
         self.pbar.setGeometry(10, 25, 600, 10)
         self.pbar.setMinimum(0)
         self.pbar.setMaximum(len(task.imageInfos))
         self.pbar.setValue(0)
         self.update_task_signa.connect(self.update_task_thread)
+        # 状态
+        self.status = QLabel(self.groupBox)
+        self.status.setGeometry(620, 12, 70, 20)
+        self.status.setText("等待下载")
+        # 按钮
+        self.button = ButtonQLabel(self.groupBox)
+        self.button.setGeometry(700, 12, 100, 20)
+        self.button.setText("暂停")
+        self.button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        button_font = QtGui.QFont()
+        button_font.setUnderline(True)
+        self.button.setFont(button_font)
+        self.button.onclick(self.button_click)
+
+    def change_status(self):
+        # 按钮逻辑
+        if self.task.status == 0:
+            self.status.setText("等待下载")
+            self.button.setVisible(False)
+        elif self.task.status == 1:
+            self.button.setVisible(True)
+            self.button.setText("暂停")
+            self.status.setText("正在下载")
+        elif self.task.status == 2:
+            self.button.setVisible(True)
+            self.button.setText("继续")
+            self.status.setText("暂停")
+        elif self.task.status == -1:
+            # 判断是否下载完成
+            if len(self.task.error) < 1:
+                self.button.setVisible(False)
+                self.status.setText("下载完成")
+            else:
+                self.button.setVisible(True)
+                self.button.setText("下载错误")
+                self.status.setText("重试")
+
+    def button_click(self):
+        if self.task.status == 1:
+            self.task.status = 2
+        elif self.task.status == 2:
+            self.task.status = 0
+            constant.SERVICE.add_task(self.task)
+        elif self.task.status == -1:
+            constant.SERVICE.add_task(self.task)
+        self.change_status()
 
     def update_task_thread(self):
-        self.schedule.setText("总页数:{}  已下载:{}  下载失败:{}".format(len(self.task.imageInfos), len(self.task.success),
-                                                               len(self.task.error)))
-
+        self.schedule.setText(
+            f"总页数:{len(self.task.imageInfos)}  已下载:{len(self.task.success)}  下载失败:{len(self.task.error)}")
         self.pbar.setValue(self.task.doneNum)
+        self.change_status()
 
     def update_task(self, task: DownloadTask):
-        self.task.doneNum = task.doneNum
+        self.task = task
         self.update_task_signa.emit()
 
 
@@ -103,8 +149,8 @@ class UIComicInfoWidget(QWidget):
 
         # web
         self.domain = QLabel(self)
-        self.domain.setText("查看原网页 : " + comic_info.domain)
-        self.domain.setText('查看原网页 : <a href="{}">{}</a>'.format(comic_info.url, comic_info.domain))
+        self.domain.setText(f"查看原网页 : {comic_info.domain}")
+        self.domain.setText(f'查看原网页 : <a href="{comic_info.url}">{comic_info.domain}</a>')
         self.domain.setGeometry(220, 210, 150, 40)
         self.domain.setOpenExternalLinks(True)
         self.domain.setFont(info_font)
@@ -235,8 +281,8 @@ class UIComicListWidget(QWidget):
 
         # web
         self.domain = QLabel(self)
-        self.domain.setText("查看原网页 : " + comic_info.domain)
-        self.domain.setText('查看原网页 : <a href="{}">{}</a>'.format(comic_info.url, comic_info.domain))
+        self.domain.setText(f"查看原网页 : {comic_info.domain}")
+        self.domain.setText(f'查看原网页 : <a href="{comic_info.url}">{comic_info.domain}</a>')
         self.domain.setGeometry(500, 70, 250, 20)
         self.domain.setOpenExternalLinks(True)
 

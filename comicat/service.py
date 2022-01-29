@@ -9,7 +9,6 @@ from util import find_database_access_class
 
 class Service(object):
     d = dict()
-
     _instance = None
 
     def __new__(cls, *args, **kw):
@@ -54,6 +53,9 @@ class Service(object):
         task.imageInfos = service.parse_image_list(chapter_info)
         callback(task)
         # 添加到下载线程池中
+        self.down_pool.submit(task.download_image_thread)
+
+    def add_task(self, task: DownloadTask):
         self.down_pool.submit(task.download_image_thread)
 
     def parse_image(self, comic_info: ComicInfo, chapter_info: ChapterInfo, callback):

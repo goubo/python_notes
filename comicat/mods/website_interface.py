@@ -8,17 +8,11 @@ class WebsiteInterface(object):
     """
         单个网站的爬虫实现本接口
         class名称必须包括 Comicat 例如 Dm5Comicat , ComicatBilibili
-        # webSiteName : 网站名称
-        # domain : 网站首页
-        # searchUrl: 搜索地址
+
 
     """
     __metaclass__ = ABCMeta  # 指定这是一个抽象类
 
-    #
-    # webSiteName: str
-    # domain: str
-    # searchUrl: str
 
     @abstractmethod  # 抽象方法
     def search_callback(self, key, callback) -> List[ComicInfo]:
