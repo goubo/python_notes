@@ -1,5 +1,5 @@
 from service import Service
 
-open_tab = []
+OPEN_TAB = []
 
-service = Service()
+SERVICE = Service()

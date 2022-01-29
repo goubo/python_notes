@@ -44,7 +44,6 @@ class DM5Comicat(WebsiteInterface):
         for page in range(1, int(page_count) + 1):
             chapter_fun_url = "{}chapterfun.ashx?cid={}&page={}&key=&language=1&gtk=6&_cid={}&_mid={}&_dt={}&_sign={}" \
                 .format(chapter_info.url, cid, page, cid, mid, dt, sign)
-            print(chapter_fun_url)
             response = req.get(chapter_fun_url, headers=self.headers)
             js = execjs.eval(response.text)
             info = ImageInfo()
@@ -104,7 +103,7 @@ class DM5Comicat(WebsiteInterface):
             for a in alist:
                 a: Selector
                 chapter_info = ChapterInfo()
-                chapter_info.title = a.text
+                chapter_info.title = a.text.strip()
                 chapter_info.url = self.domain + a.attrib.get("href")
                 info.chapterList.append(chapter_info)
             return info

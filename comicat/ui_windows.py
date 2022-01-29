@@ -2,19 +2,59 @@ from typing import List
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGroupBox, QScrollArea, QTabWidget, QTabBar, QHBoxLayout, \
-    QCheckBox, QPushButton, QMessageBox
+    QCheckBox, QPushButton, QMessageBox, QProgressBar
 
-from constant import open_tab, service
+import constant
+from download_task import DownloadTask
 from entity import ComicInfo, ChapterInfo
 from extend_widgets import ButtonQLabel
 
 
+class DownLoadTaskWidget(QWidget):
+    update_task_signa = QtCore.pyqtSignal()
+
+    def __init__(self, task: DownloadTask):
+        super().__init__()
+        self.task = task
+        task.widget = self
+        self.setMinimumHeight(40)
+        self.groupBox = QGroupBox(self)
+
+        self.title = QLabel(self.groupBox)
+        self.title.setText(task.comicInfo.title + task.chapterInfo.title)
+        self.title.setGeometry(10, 5, 300, 20)
+        # 下载进度
+        self.schedule = QLabel(self.groupBox)
+        self.schedule.setText("总页数:{}  已下载:{}  下载失败:{}".format(len(task.imageInfos), len(task.success),
+                                                               len(task.error)))
+        self.schedule.setGeometry(310, 5, 200, 20)
+        # 状态
+        self.pbar = QProgressBar(self.groupBox)
+        self.pbar.setGeometry(10, 25, 600, 10)
+        self.pbar.setMinimum(0)
+        self.pbar.setMaximum(len(task.imageInfos))
+        self.pbar.setValue(0)
+        self.update_task_signa.connect(self.update_task_thread)
+
+    def update_task_thread(self):
+        self.schedule.setText("总页数:{}  已下载:{}  下载失败:{}".format(len(self.task.imageInfos), len(self.task.success),
+                                                               len(self.task.error)))
+
+        self.pbar.setValue(self.task.doneNum)
+
+    def update_task(self, task: DownloadTask):
+        self.task.doneNum = task.doneNum
+        self.update_task_signa.emit()
+
+
 class UIComicInfoWidget(QWidget):
     load_chapter_list_signa = QtCore.pyqtSignal(ChapterInfo)
+    load_download_task_signa = QtCore.pyqtSignal(DownloadTask)
 
-    def __init__(self, comic_info: ComicInfo):
+    def __init__(self, comic_info: ComicInfo, down_v_box_layout: QVBoxLayout):
         super().__init__()
         self.comic_info = comic_info
+        self.down_v_box_layout = down_v_box_layout
         self.img_label = QLabel(self)
         self.img_label.setScaledContents(True)
         w, h = 200, 300
@@ -104,9 +144,10 @@ class UIComicInfoWidget(QWidget):
         self.down_button.clicked.connect(self.download_button_click)
 
         self.load_chapter_list_signa.connect(self.load_chapter)
+        self.load_download_task_signa.connect(self.download_callback)
 
         # 调用对应的service的接口,获取章节列表
-        service.chapter(comic_info, self.load_chapter_list_signa.emit)
+        constant.SERVICE.chapter(comic_info, self.load_chapter_list_signa.emit)
 
     i = 0
     searchVBoxLayout: QVBoxLayout
@@ -116,11 +157,16 @@ class UIComicInfoWidget(QWidget):
         for check_box in self.check_box_list:
             check_box.setChecked(self.check_all.isChecked())
 
+    def download_callback(self, task: DownloadTask):
+        widget = DownLoadTaskWidget(task)
+        self.down_v_box_layout.addWidget(widget)
+
     def download_button_click(self):
         flag = False
         for check_box in self.check_box_list:
             if check_box.isChecked():
-                service.parse_image(self.comic_info, check_box.property("chapter_info"))
+                constant.SERVICE.parse_image(self.comic_info, check_box.property("chapter_info"),
+                                             self.load_download_task_signa.emit)
                 if not flag:
                     QMessageBox.information(self, "下载通知", "正在解析选中章节", QMessageBox.StandardButton.Yes)
                     flag = True
@@ -140,10 +186,11 @@ class UIComicInfoWidget(QWidget):
 
 
 class UIComicListWidget(QWidget):
-    def __init__(self, comic_info: ComicInfo, tab_widget: QTabWidget):
+    def __init__(self, comic_info: ComicInfo, tab_widget: QTabWidget, down_v_box_layout: QVBoxLayout):
         super().__init__()
         self.tabWidget = tab_widget
         self.comicInfo = comic_info
+        self.down_v_box_layout = down_v_box_layout
         self.setMinimumHeight(200)
         # g_layout = QGridLayout(self)
         # 图片
@@ -203,12 +250,12 @@ class UIComicListWidget(QWidget):
             QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignTop)
 
     def add_tab(self):
-        if self.comicInfo.url in open_tab:
-            self.tabWidget.setCurrentIndex(open_tab.index(self.comicInfo.url) + 2)
+        if self.comicInfo.url in constant.OPEN_TAB:
+            self.tabWidget.setCurrentIndex(constant.OPEN_TAB.index(self.comicInfo.url) + 2)
         else:
-            info = UIComicInfoWidget(self.comicInfo)
+            info = UIComicInfoWidget(self.comicInfo, self.down_v_box_layout)
             self.tabWidget.setCurrentIndex(self.tabWidget.addTab(info, self.comicInfo.title))
-            open_tab.append(self.comicInfo.url)
+            constant.OPEN_TAB.append(self.comicInfo.url)
 
 
 class MainWindowWidget(QWidget):
@@ -270,20 +317,31 @@ class MainWindowWidget(QWidget):
         self.searchScroll.setWidgetResizable(True)
         self.searchLayout.addWidget(self.searchScroll)
 
+        self.downVBoxLayout = QVBoxLayout()
+        self.downGroupBox = QGroupBox()
+        self.downScroll = QScrollArea()
+        self.downLayout = QVBoxLayout(self.down_tab)
+        self.downVBoxLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+
+        self.downGroupBox.setLayout(self.downVBoxLayout)
+        self.downScroll.setWidget(self.downGroupBox)
+        self.downScroll.setWidgetResizable(True)
+        self.downLayout.addWidget(self.downScroll)
+
         self.souInput.returnPressed.connect(self.input_return_pressed)  # 回车搜索
 
         self.load_comic_list_signa.connect(self.load_comic_list)  # 更新ui的插槽
 
     def tab_close(self, index):
         self.tabWidget.removeTab(index)
-        del open_tab[index - 2]
+        del constant.OPEN_TAB[index - 2]
 
     def input_return_pressed(self):
         for i in range(self.searchVBoxLayout.count()):
             self.searchVBoxLayout.itemAt(i).widget().deleteLater()
-        service.search(self.souInput.text(), self.load_comic_list_signa.emit)  # 查询回调出发插槽
+        constant.SERVICE.search(self.souInput.text(), self.load_comic_list_signa.emit)  # 查询回调出发插槽
         self.tabWidget.setCurrentIndex(1)
 
     def load_comic_list(self, info: ComicInfo):
-        comic_info_widget = UIComicListWidget(info, self.tabWidget)
+        comic_info_widget = UIComicListWidget(info, self.tabWidget, self.downVBoxLayout)
         self.searchVBoxLayout.addWidget(comic_info_widget)
