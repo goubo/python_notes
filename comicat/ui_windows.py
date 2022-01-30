@@ -1,6 +1,7 @@
 from typing import List
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGroupBox, QScrollArea, QTabWidget, QTabBar, QHBoxLayout, \
     QCheckBox, QPushButton, QMessageBox, QProgressBar
 
@@ -8,6 +9,7 @@ import constant
 from download_task import DownloadTask
 from entity import ComicInfo, ChapterInfo
 from extend_widgets import ButtonQLabel
+from util import image_resize
 
 
 class DownLoadTaskWidget(QWidget):
@@ -18,6 +20,7 @@ class DownLoadTaskWidget(QWidget):
         self.task = task
         task.widget = self
         self.setMinimumHeight(40)
+        self.setMaximumHeight(40)
         self.groupBox = QGroupBox(self)
 
         self.title = QLabel(self.groupBox)
@@ -103,12 +106,12 @@ class UIComicInfoWidget(QWidget):
         self.down_v_box_layout = down_v_box_layout
         self.img_label = QLabel(self)
         self.img_label.setScaledContents(True)
-        w, h = 200, 300
-        # w, h = utils.image_resize(comic_info.cover, height=200)
+        img = QImage.fromData(comic_info.cover)
+        w, h = image_resize(comic_info.cover, width=200)
         self.img_label.resize(QtCore.QSize(w, h))
         self.img_label.setGeometry(10, 10, w, h)
-        # self.img_label.setPixmap(QPixmap.fromImage(img))
-        self.img_label.setPixmap(QtGui.QPixmap("/Users/bo/my/tmp/老夫子2/第1卷/1.jpg"))
+        self.img_label.setPixmap(QPixmap.fromImage(img))
+        # self.img_label.setPixmap(QtGui.QPixmap("/Users/bo/my/tmp/老夫子2/第1卷/1.jpg"))
 
         self.title = QLabel(self)
         self.title.setGeometry(220, 10, 100, 40)
@@ -238,17 +241,15 @@ class UIComicListWidget(QWidget):
         self.comicInfo = comic_info
         self.down_v_box_layout = down_v_box_layout
         self.setMinimumHeight(200)
-        # g_layout = QGridLayout(self)
         # 图片
-        # img = QImage.fromData(comic_info.cover)
+        img = QImage.fromData(comic_info.cover)
         self.img_label = QLabel(self)
         self.img_label.setScaledContents(True)
-        w, h = 150, 300
-        # w, h = utils.image_resize(comic_info.cover, height=200)
+        w, h = image_resize(comic_info.cover, height=200)
         self.img_label.resize(QtCore.QSize(w, h))
         self.img_label.setGeometry(5, 5, w, h)
-        # self.img_label.setPixmap(QPixmap.fromImage(img))
-        self.img_label.setPixmap(QtGui.QPixmap("/Users/bo/my/tmp/老夫子2/第1卷/1.jpg"))
+        self.img_label.setPixmap(QPixmap.fromImage(img))
+        # self.img_label.setPixmap(QtGui.QPixmap("/Users/bo/my/tmp/老夫子2/第1卷/1.jpg"))
         # 标题
         self.title = ButtonQLabel(self)
         self.title.onclick(self.add_tab)

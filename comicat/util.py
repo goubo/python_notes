@@ -1,5 +1,26 @@
 import os
 import pkgutil
+from io import BytesIO
+
+from PIL import Image
+
+
+def image_resize(image_bytes, width=None, height=None):
+    """指定宽或高，得到按比例缩放后的宽高
+    :param image_bytes: 图片
+    :param width:目标宽度
+    :param height:目标高度
+    :return:按比例缩放后的 宽和高
+    """
+
+    image = Image.open(BytesIO(image_bytes))
+    if not width and not height:
+        return image.size
+    if not width or not height:
+        _width, _height = image.size
+        height = width * _height // _width if width else height
+        width = height * _width // _height if height else width
+        return width, height
 
 
 def find_database_access_class(parent_module_name: str, module_dir: str, sub_class: str = "Comicat") -> dict:

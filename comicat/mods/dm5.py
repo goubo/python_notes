@@ -16,10 +16,10 @@ class DM5Comicat(WebsiteInterface):
         self.webSiteName = "dm5"
         self.searchUrl = "https://www.dm5.com/search?title={}"
         self.domain = "https://www.dm5.com"
-        self.headers = {'Host': 'www.dm5.com',
-                        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
-                                      'like Gecko) Chrome/97.0.4692.99 Safari/537.36'
-                        }
+        self.headers = {
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, '
+                          'like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+        }
 
     def down_image(self, image_info) -> bytes:
         self.headers['referer'] = 'https://www.dm5.com{}'.format(image_info['dm5Curl'])
@@ -96,7 +96,8 @@ class DM5Comicat(WebsiteInterface):
             info.status = tree.xpath("//div[@class='info']/p[@class='tip']/span/span/text()")[0].strip()
             info.coverUrl = tree.xpath("//div[@class='cover']/img/@src")[0].strip()
             info.tip = ",".join(tree.xpath("//div[@class='info']/p[@class='tip']/span/a/span/text()"))
-            # info.cover = requests.get(info.coverUrl).content #TODO 本地测试
+            res = requests.get(info.coverUrl)
+            info.cover = requests.get(info.coverUrl, headers=self.headers).content
 
             # 这个网站直接爬章节, 放到comicinfo对象中,获取章节的时候,不用再请求一次
             alist: SelectorList = tree.xpath("//ul[@class='view-win-list detail-list-select']/li/a")
@@ -111,18 +112,18 @@ class DM5Comicat(WebsiteInterface):
 
 if __name__ == '__main__':
     s = DM5Comicat()
-    chapterinfo = ChapterInfo()
-    chapterinfo.url = "https://www.dm5.com/m518896/"
-    s.parse_image_list(chapterinfo)
 
+
+    # chapterinfo = ChapterInfo()
+    # chapterinfo.url = "https://www.dm5.com/m518896/"
+    # s.parse_image_list(chapterinfo)
 
     def test(info):
-        pass
+        info: ComicInfo
+        print(info.title)
+        print(info.url)
+        print(info.author)
+        print(info.describe)
 
-    # l = s.search_callback("龙珠", test)
-    # for c in l:
-    #     c: ComicInfo
-    #     print(c.title)
-    #     print(c.url)
-    #     print(c.author)
-    #     print(c.describe)
+
+    s.search_callback("龙珠", test)
