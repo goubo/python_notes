@@ -4,6 +4,7 @@ import time
 import typing
 import urllib
 
+import constant
 from entity import ComicInfo, ChapterInfo, ImageInfo
 from mods.website_interface import WebsiteInterface
 
@@ -23,13 +24,16 @@ class DownloadTask(object):
         self.error = {}
 
     def download_image_thread(self):
+        if constant.APPLICATION_EXIT:
+            return
+
         if self.status == 0 or self.status == 1:
             self.status = 1
             filePath = f"/Users/bo/my/tmp/comicat_down/{self.comicInfo.title}/{self.chapterInfo.title}/"
             if not os.path.exists(filePath):
                 os.makedirs(filePath)
             for page in range(len(self.success) + len(self.error) + 1, len(self.imageInfos) + 1):
-                if self.status != 1:
+                if self.status != 1 or constant.APPLICATION_EXIT:
                     return
                 web_service = self.comicInfo.service
                 web_service: WebsiteInterface

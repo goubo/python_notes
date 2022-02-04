@@ -3,7 +3,7 @@ from typing import List
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGroupBox, QScrollArea, QTabWidget, QTabBar, QHBoxLayout, \
-    QCheckBox, QPushButton, QMessageBox, QProgressBar
+    QCheckBox, QPushButton, QMessageBox, QProgressBar, QMainWindow
 
 import constant
 from download_task import DownloadTask
@@ -311,11 +311,6 @@ class MainWindowWidget(QWidget):
     def __init__(self, main_window: QWidget):
         super().__init__()
         self.search_callback = None
-        main_window.setObjectName("MainWindow")
-        main_window.setWindowTitle("abc")
-        main_window.resize(1024, 768)
-        main_window.setMinimumSize(QtCore.QSize(1024, 768))
-        main_window.setMaximumSize(QtCore.QSize(1024, 768))
         # 主题空间 子组件都放这个Widget里
         self.centralWidget = QtWidgets.QWidget(main_window)
         self.centralWidget.setObjectName("centralWidget")
@@ -392,3 +387,18 @@ class MainWindowWidget(QWidget):
     def load_comic_list(self, info: ComicInfo):
         comic_info_widget = UIComicListWidget(info, self.tabWidget, self.downVBoxLayout)
         self.searchVBoxLayout.addWidget(comic_info_widget)
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setObjectName("MainWindow")
+        self.setWindowTitle("abc")
+        self.resize(1024, 768)
+        self.setMinimumSize(QtCore.QSize(1024, 768))
+        self.setMaximumSize(QtCore.QSize(1024, 768))
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        print("退出")
+        constant.SERVICE.stop_all()
+        event.accept()

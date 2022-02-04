@@ -54,9 +54,9 @@ class DM5Comicat(WebsiteInterface):
         return image_list
 
     def chapter_callback(self, comic_info: ComicInfo, callback):
-        for chapter_info in comic_info.chapterList:
+        for chapter_info in comic_info['chapterList']:
             callback(chapter_info)
-        return comic_info.chapterList
+        return comic_info['chapterList']
 
     def search_callback(self, key, callback) -> list[ComicInfo]:
         comic_info_list: List[ComicInfo] = []
@@ -67,12 +67,10 @@ class DM5Comicat(WebsiteInterface):
         else:
             tree = etree.HTML(response.text)
             info = self.dm5_info(self.domain + tree.xpath("//div[@class='info']/p[@class='title']/a/@href")[0])
-            info.service = self
             callback(info)
             comic_info_list.append(info)
             for i in tree.xpath("/html/body/section[2]/div/ul/li/div/div[2]/div/a/@href"):
                 info = self.dm5_info(self.domain + i)
-                info.service = self
                 callback(info)
                 comic_info_list.append(info)
         return comic_info_list
@@ -84,6 +82,7 @@ class DM5Comicat(WebsiteInterface):
             return None
         else:
             info = ComicInfo()
+            info['chapterList'] = []
             info.url = url
             info.domain = self.webSiteName
             tree = etree.HTML(response.text)
@@ -100,13 +99,13 @@ class DM5Comicat(WebsiteInterface):
             info.cover = requests.get(info.coverUrl, headers=self.headers).content
 
             # 这个网站直接爬章节, 放到comicinfo对象中,获取章节的时候,不用再请求一次
-            alist: SelectorList = tree.xpath("//ul[@class='view-win-list detail-list-select']/li/a")
+            alist: SelectorList = tree.xpath("//ul[@class='view-win-list detail-list-select']//li/a")
             for a in alist:
                 a: Selector
                 chapter_info = ChapterInfo()
                 chapter_info.title = a.text.strip()
                 chapter_info.url = self.domain + a.attrib.get("href")
-                info.chapterList.append(chapter_info)
+                info['chapterList'].append(chapter_info)
             return info
 
 
@@ -124,6 +123,7 @@ if __name__ == '__main__':
         print(info.url)
         print(info.author)
         print(info.describe)
+        print(info['chapterList'])
 
 
     s.search_callback("龙珠", test)

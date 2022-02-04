@@ -24,5 +24,4 @@ class ComicInfo(dict):
     domain: str  # 网站编号
     status: str  # 状态
     tip: str  # 分类
-    service: object
-    chapterList: typing.List[ChapterInfo] = []
+    service: str  # mod 名称
