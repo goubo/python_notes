@@ -35,6 +35,7 @@ class DownloadTask(object):
                 web_service: WebsiteInterface = constant.mod_dist[self.comicInfo.service]
                 image_path = file_path + os.sep + ("%0{}d".format(len(str(len(self.imageInfos)))) % page) + \
                              os.path.splitext(urllib.parse.urlparse(self.imageInfos[page - 1].url).path)[-1]
+
                 self.success[image_path] = page
                 img_bytes = web_service.down_image(self.imageInfos[page])
                 with open(image_path, "wb") as f:
@@ -59,3 +60,8 @@ class DownloadTask(object):
                 # 更新下载状态
                 self.error.pop(k)
                 self.widget.update_task(self)
+
+
+if __name__ == '__main__':
+    print(os.path.splitext('https://www.google.com.hk/search.txt?q=pyhton+Optional&oq=pyhton+Optional&aqs=chrome'
+                         '..69i57j0i13l9.3421j0j4&sourceid=chrome&ie=UTF-8'))

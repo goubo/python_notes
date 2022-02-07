@@ -335,19 +335,37 @@ class MainWindowWidget(QWidget):
         self.down_tab.setAutoFillBackground(False)
         self.down_tab.setObjectName("down_tab")
         self.tabWidget.addTab(self.down_tab, "下载列表")
+        # 书架页面
+        self.bookshelf_tab = QtWidgets.QWidget()
+        self.bookshelf_tab.setObjectName("bookshelf_tab")
+        self.tabWidget.addTab(self.bookshelf_tab, "书架")
         # 搜索结果页面
         self.search_tab = QtWidgets.QWidget()
         self.search_tab.setObjectName("search_tab")
         self.tabWidget.addTab(self.search_tab, "搜索结果")
-
-        self.tabWidget.tabBar().setTabButton(0, QTabBar.ButtonPosition.LeftSide, None)
-        self.tabWidget.tabBar().setTabButton(1, QTabBar.ButtonPosition.LeftSide, None)
-
+        # None 空按钮,tab签右侧按钮,设置到前面
+        tbr = self.tabWidget.tabBar().tabButton(0, QTabBar.ButtonPosition.RightSide)
+        self.tabWidget.tabBar().setTabButton(0, QTabBar.ButtonPosition.LeftSide, tbr)
+        self.tabWidget.tabBar().setTabButton(1, QTabBar.ButtonPosition.LeftSide, tbr)
+        self.tabWidget.tabBar().setTabButton(2, QTabBar.ButtonPosition.LeftSide, tbr)
+        # 启用关闭页签的功能
         self.tabWidget.tabCloseRequested.connect(self.tab_close)
-
+        # 默认打开到书架
+        self.tabWidget.setCurrentIndex(1)
         # 主体的centralWidget 放到主窗口中
         main_window.setCentralWidget(self.centralWidget)
+        # 书架页
+        self.bookshelfVBoxLayout = QVBoxLayout()
+        self.bookshelfGroupBox = QGroupBox()
+        self.bookshelfScroll = QScrollArea()
+        self.bookshelfLayout = QVBoxLayout(self.bookshelf_tab)
+        self.bookshelfVBoxLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
+        self.bookshelfGroupBox.setLayout(self.bookshelfVBoxLayout)
+        self.bookshelfScroll.setWidget(self.bookshelfGroupBox)
+        self.bookshelfScroll.setWidgetResizable(True)
+        self.bookshelfLayout.addWidget(self.bookshelfScroll)
+        # 搜索页
         self.searchVBoxLayout = QVBoxLayout()
         self.searchGroupBox = QGroupBox()
         self.searchScroll = QScrollArea()
@@ -358,7 +376,7 @@ class MainWindowWidget(QWidget):
         self.searchScroll.setWidget(self.searchGroupBox)
         self.searchScroll.setWidgetResizable(True)
         self.searchLayout.addWidget(self.searchScroll)
-
+        # 下载页
         self.downVBoxLayout = QVBoxLayout()
         self.downGroupBox = QGroupBox()
         self.downScroll = QScrollArea()
@@ -376,13 +394,13 @@ class MainWindowWidget(QWidget):
 
     def tab_close(self, index):
         self.tabWidget.removeTab(index)
-        del constant.OPEN_TAB[index - 2]
+        del constant.OPEN_TAB[index - 3]
 
     def input_return_pressed(self):
         for i in range(self.searchVBoxLayout.count()):
             self.searchVBoxLayout.itemAt(i).widget().deleteLater()
         constant.SERVICE.search(self.souInput.text(), self.load_comic_list_signa.emit)  # 查询回调出发插槽
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(2)
 
     def load_comic_list(self, info: ComicInfo):
         comic_info_widget = UIComicListWidget(info, self.tabWidget, self.downVBoxLayout)
