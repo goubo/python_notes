@@ -29,15 +29,14 @@ class DownloadTask(object):
 
         if self.status == 0 or self.status == 1:
             self.status = 1
-            filePath = f"/Users/bo/my/tmp/comicat_down/{self.comicInfo.title}/{self.chapterInfo.title}/"
-            if not os.path.exists(filePath):
-                os.makedirs(filePath)
+            file_path = os.path.join('/Users/bo/my/tmp/comicat_down', self.comicInfo.title, self.chapterInfo.title)
+            if not os.path.exists(file_path):
+                os.makedirs(file_path)
             for page in range(len(self.success) + len(self.error) + 1, len(self.imageInfos) + 1):
                 if self.status != 1 or constant.APPLICATION_EXIT:
                     return
-                web_service = self.comicInfo.service
-                web_service: WebsiteInterface
-                image_path = filePath + ("%0{}d".format(len(str(len(self.imageInfos)))) % page) + \
+                web_service: WebsiteInterface = constant.mod_dist[self.comicInfo.service]
+                image_path = file_path + os.sep + ("%0{}d".format(len(str(len(self.imageInfos)))) % page) + \
                              os.path.splitext(urllib.parse.urlparse(self.imageInfos[page - 1].url).path)[-1]
                 self.success[image_path] = page
                 # time.sleep(random.randint(0, 5))
@@ -50,19 +49,17 @@ class DownloadTask(object):
             print("下载完成")
             self.widget.update_task(self)
         elif self.status == -1:  # 重试error列表
-            filePath = f"/Users/bo/my/tmp/comicat_down/{self.comicInfo.title}/{self.chapterInfo.title}/"
-            if not os.path.exists(filePath):
-                os.makedirs(filePath)
+            file_path = os.path.join('/Users/bo/my/tmp/comicat_down', self.comicInfo.title, self.chapterInfo.title)
+            if not os.path.exists(file_path):
+                os.makedirs(file_path)
             for k, v in self.error:
-                web_service = self.comicInfo.service
-                web_service: WebsiteInterface
-                image_path = filePath + ("%0{}d".format(len(str(len(self.imageInfos)))) % v) + \
+                web_service: WebsiteInterface = constant.mod_dist[self.comicInfo.service]
+                image_path = file_path + ("%0{}d".format(len(str(len(self.imageInfos)))) % v) + \
                              os.path.splitext(urllib.parse.urlparse(k).path)[-1]
                 self.success[image_path] = k
                 time.sleep(random.randint(0, 5))
                 # web_service.down_image(task.imageInfos[page])
                 self.doneNum += 1
                 # 更新下载状态
-                self.widget.update_task(self)
                 self.error.pop(k)
                 self.widget.update_task(self)
