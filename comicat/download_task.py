@@ -1,6 +1,4 @@
 import os
-import random
-import time
 import typing
 import urllib
 
@@ -13,11 +11,10 @@ class DownloadTask(object):
     comicInfo: ComicInfo
     chapterInfo: ChapterInfo
     imageInfos: typing.List[ImageInfo]
-    success = typing.List[str]
-    error = typing.List[str]
+    success = {}
+    error = {}
     widget: object
     status: int = 0  # 0 等待开始 1 开始 2 暂停  -1 完成
-    doneNum = 0
 
     def __init__(self):
         self.success = {}
@@ -39,11 +36,9 @@ class DownloadTask(object):
                 image_path = file_path + os.sep + ("%0{}d".format(len(str(len(self.imageInfos)))) % page) + \
                              os.path.splitext(urllib.parse.urlparse(self.imageInfos[page - 1].url).path)[-1]
                 self.success[image_path] = page
-                # time.sleep(random.randint(0, 5))
-                time.sleep(0.3)
-                # web_service.down_image(task.imageInfos[page])
-                self.doneNum += 1
-                # 更新下载状态
+                img_bytes = web_service.down_image(self.imageInfos[page])
+                with open(image_path, "wb") as f:
+                    f.write(img_bytes)
                 self.widget.update_task(self)
             self.status = -1
             print("下载完成")
@@ -57,9 +52,10 @@ class DownloadTask(object):
                 image_path = file_path + ("%0{}d".format(len(str(len(self.imageInfos)))) % v) + \
                              os.path.splitext(urllib.parse.urlparse(k).path)[-1]
                 self.success[image_path] = k
-                time.sleep(random.randint(0, 5))
-                # web_service.down_image(task.imageInfos[page])
-                self.doneNum += 1
+                # time.sleep(random.randint(0, 5))
+                img_bytes = web_service.down_image(self.imageInfos[k])
+                with open(image_path, "wb") as f:
+                    f.write(img_bytes)
                 # 更新下载状态
                 self.error.pop(k)
                 self.widget.update_task(self)

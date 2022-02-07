@@ -13,7 +13,6 @@ class WebsiteInterface(object):
     """
     __metaclass__ = ABCMeta  # 指定这是一个抽象类
 
-
     @abstractmethod  # 抽象方法
     def search_callback(self, key, callback) -> List[ComicInfo]:
         """

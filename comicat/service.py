@@ -64,7 +64,7 @@ class Service(object):
             constant.download_task_map[chapter_info.url] = task
 
     def add_task(self, task: DownloadTask):
-        self.parse_pool.submit(task.download_image_thread)
+        self.down_pool.submit(task.download_image_thread)
 
     def parse_image(self, comic_info: ComicInfo, chapter_info: ChapterInfo, callback):
         self.parse_pool.submit(self.parse_image_thread, comic_info, chapter_info, callback)

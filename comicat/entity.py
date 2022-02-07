@@ -1,6 +1,3 @@
-import typing
-
-
 class ImageInfo(dict):
     url: str
 

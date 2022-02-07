@@ -88,7 +88,7 @@ class DownLoadTaskWidget(QWidget):
     def update_task_thread(self):
         self.schedule.setText(
             f"总页数:{len(self.task.imageInfos)}  已下载:{len(self.task.success)}  下载失败:{len(self.task.error)}")
-        self.pbar.setValue(self.task.doneNum)
+        self.pbar.setValue(len(self.task.success))
         self.change_status()
 
     def update_task(self, task: DownloadTask):
@@ -221,7 +221,7 @@ class UIComicInfoWidget(QWidget):
                     flag = True
 
     def load_chapter(self, chapter_info: ChapterInfo):
-        if self.i % 23 == 0:
+        if self.i % 26 == 0:
             self.searchVBoxLayout = QVBoxLayout()
             self.searchVBoxLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)  # 对齐方式,研究了3个小时 o(╥﹏╥)o
             self.searchHBoxLayout.addLayout(self.searchVBoxLayout)

@@ -95,7 +95,6 @@ class DM5Comicat(WebsiteInterface):
             info.status = tree.xpath("//div[@class='info']/p[@class='tip']/span/span/text()")[0].strip()
             info.coverUrl = tree.xpath("//div[@class='cover']/img/@src")[0].strip()
             info.tip = ",".join(tree.xpath("//div[@class='info']/p[@class='tip']/span/a/span/text()"))
-            res = requests.get(info.coverUrl)
             info.cover = requests.get(info.coverUrl, headers=self.headers).content
 
             # 这个网站直接爬章节, 放到comicinfo对象中,获取章节的时候,不用再请求一次
