@@ -6,9 +6,9 @@ from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGroupBox, QScrollArea
     QCheckBox, QPushButton, QMessageBox, QProgressBar, QMainWindow
 
 import constant
-from download_task import DownloadTask
 from entity import ComicInfo, ChapterInfo
 from extend_widgets import ButtonQLabel
+from service import DownloadTask
 from util import image_resize
 
 
@@ -388,10 +388,24 @@ class MainWindowWidget(QWidget):
         self.downScroll.setWidget(self.downGroupBox)
         self.downScroll.setWidgetResizable(True)
         self.downLayout.addWidget(self.downScroll)
+        down_button_layout = QHBoxLayout()
+        self.downLayout.addLayout(down_button_layout)
+        down_button_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        all_start = QPushButton()
+        all_start.setText("全部开始")
+        all_stop = QPushButton()
+        all_stop.setText("全部停止")
+        clear_done = QPushButton()
+        clear_done.setText("清理已完成")
+        down_button_layout.addWidget(all_start)
+        down_button_layout.addWidget(all_stop)
+        down_button_layout.addWidget(clear_done)
 
         self.souInput.returnPressed.connect(self.input_return_pressed)  # 回车搜索
 
         self.load_comic_list_signa.connect(self.load_comic_list)  # 更新ui的插槽
+    def stop_all_task(self):
+        constant.SERVICE.stop_all_task()
 
     def tab_close(self, index):
         """
@@ -444,5 +458,5 @@ class MainWindow(QMainWindow):
         :return:
         """
         print("退出")
-        constant.SERVICE.stop_all()
+        constant.SERVICE.application_down()
         event.accept()
