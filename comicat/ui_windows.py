@@ -61,27 +61,25 @@ class DownLoadTaskWidget(QWidget):
             self.button.setVisible(True)
             self.button.setText("暂停")
             self.status.setText("正在下载")
-        elif self.task.status == 2:
+        elif self.task.status == 2 or self.task.status == -3:
             self.button.setVisible(True)
             self.button.setText("继续")
             self.status.setText("暂停")
         elif self.task.status == -1:
-            # 判断是否下载完成
-            if len(self.task.error) < 1:
-                self.button.setVisible(False)
-                self.status.setText("下载完成")
-            else:
-                self.button.setVisible(True)
-                self.button.setText("下载错误")
-                self.status.setText("重试")
+            self.button.setVisible(False)
+            self.status.setText("下载完成")
+        elif self.task.status == -2:
+            self.button.setVisible(True)
+            self.button.setText("重试")
+            self.status.setText("下载错误")
 
     def button_click(self):
-        if self.task.status == 1:
+        if self.task.status == 1:  # 正在下载,点击暂停
             self.task.status = 2
-        elif self.task.status == 2:
+        elif self.task.status == 2 or self.task.status == -3:  # 暂停 ,点击等待下载,添加到队列
             self.task.status = 0
             constant.SERVICE.add_task(self.task)
-        elif self.task.status == -1:
+        elif self.task.status == -2:  # 错误,点击重试
             constant.SERVICE.add_task(self.task)
         self.change_status()
 
@@ -298,7 +296,7 @@ class UIComicListWidget(QWidget):
 
     def add_tab(self):
         if self.comicInfo.url in constant.OPEN_TAB:
-            self.tabWidget.setCurrentIndex(constant.OPEN_TAB.index(self.comicInfo.url) + 2)
+            self.tabWidget.setCurrentIndex(constant.OPEN_TAB.index(self.comicInfo.url) + 3)
         else:
             info = UIComicInfoWidget(self.comicInfo, self.down_v_box_layout)
             self.tabWidget.setCurrentIndex(self.tabWidget.addTab(info, self.comicInfo.title))
@@ -306,6 +304,9 @@ class UIComicListWidget(QWidget):
 
 
 class MainWindowWidget(QWidget):
+    """
+    主窗口界面 搜索框+tab页
+    """
     load_comic_list_signa = QtCore.pyqtSignal(ComicInfo)
 
     def __init__(self, main_window: QWidget):
@@ -393,21 +394,40 @@ class MainWindowWidget(QWidget):
         self.load_comic_list_signa.connect(self.load_comic_list)  # 更新ui的插槽
 
     def tab_close(self, index):
+        """
+        关闭tab,删掉缓存的列表
+        :param index: tab索引
+        :return:
+        """
         self.tabWidget.removeTab(index)
         del constant.OPEN_TAB[index - 3]
 
     def input_return_pressed(self):
-        for i in range(self.searchVBoxLayout.count()):
+        """
+        搜索框回车函数
+        :return:
+        """
+        for i in range(self.searchVBoxLayout.count()):  # 清理显示的内容
             self.searchVBoxLayout.itemAt(i).widget().deleteLater()
         constant.SERVICE.search(self.souInput.text(), self.load_comic_list_signa.emit)  # 查询回调出发插槽
         self.tabWidget.setCurrentIndex(2)
 
     def load_comic_list(self, info: ComicInfo):
+        """
+        解析的漫画信息,通过回调到本方法,加载页面
+        :param info:
+        :return:
+        """
+        # 加载到展示视图,需要判断你,是否还是之前的搜索项 # TODO 判断搜索框内容是否变化
         comic_info_widget = UIComicListWidget(info, self.tabWidget, self.downVBoxLayout)
         self.searchVBoxLayout.addWidget(comic_info_widget)
 
 
 class MainWindow(QMainWindow):
+    """
+    主窗口组件,init 初始化窗口,可以在这里加载配置,读取数据
+    """
+
     def __init__(self):
         super().__init__()
         self.setObjectName("MainWindow")
@@ -417,6 +437,11 @@ class MainWindow(QMainWindow):
         self.setMaximumSize(QtCore.QSize(1024, 768))
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """
+        退出事件,退出前持久化数据,配置
+        :param event:
+        :return:
+        """
         print("退出")
         constant.SERVICE.stop_all()
         event.accept()

@@ -17,9 +17,15 @@ mod_dist = dict()
 # 配置
 
 # 本地数据
-'''下载队列.key value ,url taskInfo'''
+# 下载队列
+downloaded_task_map = dict()
+"""下载历史,用于确认本地数据是否存在"""
 download_task_map = dict()
+'''下载队列.key:value ,url:taskInfo,下载完成后删除'''
 
 # 临时数据
-'''查询缓存,mod解析的页面返回,统统缓存到这个对象中'''
 temp = dict()
+'''查询缓存,mod解析的页面返回,统统缓存到这个对象中
+k: url
+v:object
+'''
