@@ -418,9 +418,10 @@ class MainWindowWidget(QWidget):
         :param info:
         :return:
         """
-        # 加载到展示视图,需要判断你,是否还是之前的搜索项 # TODO 判断搜索框内容是否变化
-        comic_info_widget = UIComicListWidget(info, self.tabWidget, self.downVBoxLayout)
-        self.searchVBoxLayout.addWidget(comic_info_widget)
+        # 加载到展示视图,需要判断你,是否还是之前的搜索项
+        if self.souInput.text() == info.searchKey:
+            comic_info_widget = UIComicListWidget(info, self.tabWidget, self.downVBoxLayout)
+            self.searchVBoxLayout.addWidget(comic_info_widget)
 
 
 class MainWindow(QMainWindow):

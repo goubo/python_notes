@@ -11,6 +11,7 @@ class ComicInfo(dict):
     """
     搜索结果:漫画详情
     """
+    searchKey: str
     title: str  # 标题
     cover: bytes  # 封面
     coverUrl: str  # 封面

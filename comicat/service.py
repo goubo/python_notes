@@ -6,15 +6,17 @@ from threadpool import BoundedThreadPoolExecutor
 from util import find_database_access_class
 
 
-def set_class_name(comic: ComicInfo, class_name, callback):
+def set_class_name(comic: ComicInfo, class_name, key, callback):
     """
     填充modName
+    :param key: 搜索key,判断渲染线程是否是本线程
     :param comic: 漫画实体对象
     :param class_name: modName
     :param callback: 回调函数,返回漫画实体
     :return:
     """
     comic.service = class_name
+    comic.searchKey = key
     callback(comic)
 
 
@@ -33,7 +35,7 @@ def search_thread(k, callback):
         for class_name, class_ in find_database_access_class("comicat", "mods").items():
             co = class_()
             constant.mod_dist[class_name] = co
-            constant.temp[k] = co.search_callback(k, lambda comic: set_class_name(comic, class_name, callback))
+            constant.temp[k] = co.search_callback(k, lambda comic: set_class_name(comic, class_name, k, callback))
 
 
 def chapter_thread(comic_info: ComicInfo, callback):
