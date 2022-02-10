@@ -6,7 +6,7 @@ import urllib3
 import constant
 from entity import ComicInfo, ChapterInfo, ImageInfo
 from mods.website_interface import WebsiteInterface
-from util import find_database_access_class, BoundedThreadPoolExecutor
+from util import BoundedThreadPoolExecutor
 
 
 def set_class_name(comic: ComicInfo, class_name, key, callback):
@@ -35,10 +35,8 @@ def search_thread(k, callback):
         for item in constant.temp.get(k):
             callback(item)
     else:
-        for class_name, class_ in find_database_access_class("comicat", "mods").items():
-            co = class_()
-            constant.mod_dist[class_name] = co
-            constant.temp[k] = co.search_callback(k, lambda comic: set_class_name(comic, class_name, k, callback))
+        for key, value in constant.mod_dist.items():
+            constant.temp[k] = value.search_callback(k, lambda comic: set_class_name(comic, key, k, callback))
 
 
 def chapter_thread(comic_info: ComicInfo, callback):
@@ -63,7 +61,6 @@ class DownloadTask(object):
     imageInfos: typing.List[ImageInfo]
     success = {}
     error = {}
-    widget: object
     status: int = 0  # 0:等待开始;1:开始;2:暂停;-1:完成;-2:完成,有错误;-3:有错误,暂停
     show: int = 1  # 下载列表是否展示
 
@@ -90,9 +87,9 @@ class DownloadTask(object):
                 img_bytes = web_service.down_image(self.imageInfos[page - 1])
                 with open(image_path, "wb") as f:
                     f.write(img_bytes)
-                self.widget.update_task(self)
+                constant.download_task_widget_map[self.chapterInfo.url].update_task(self)
             self.status = -2 if len(self.error) > 0 else -1
-            self.widget.update_task(self)
+            constant.download_task_widget_map[self.chapterInfo.url].update_task(self)
         elif self.status == -2:  # 重试error列表
             file_path = os.path.join('/Users/bo/my/tmp/comicat_down', self.comicInfo.title, self.chapterInfo.title)
             if not os.path.exists(file_path):
@@ -108,11 +105,13 @@ class DownloadTask(object):
                     f.write(img_bytes)
                 # 更新下载状态
                 self.error.pop(k)
-                self.widget.update_task(self)
+                constant.download_task_widget_map[self.chapterInfo.url].update_task(self)
             self.status = -2 if len(self.error) > 0 else -1
+            constant.download_task_widget_map[self.chapterInfo.url].update_task(self)
         # 真正完成
         if self.status == -1:
             constant.download_task_map.pop(self.chapterInfo.url, None)
+            constant.downloaded_comic_map[self.comicInfo.url] = self.comicInfo
 
 
 class Service(object):
@@ -213,3 +212,6 @@ class Service(object):
         constant.APPLICATION_EXIT = True
         self.down_pool.shutdown()
         self.parse_pool.shutdown()
+        constant.DB['downloaded_task_map'] = constant.downloaded_task_map
+        constant.DB['download_task_map'] = constant.download_task_map
+        constant.DB['downloaded_comic_map'] = constant.downloaded_comic_map

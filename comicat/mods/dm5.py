@@ -24,7 +24,7 @@ class DM5Comicat(WebsiteInterface):
 
     def down_image(self, image_info) -> Optional[bytes]:
         _headers = self.headers.copy()
-        _headers['Referer'] = 'https://www.dm5.com{}'.format(image_info['dm5Curl'])
+        _headers['Referer'] = '{}{}'.format(self.domain, image_info['dm5Curl'])
         response = self.session.get(image_info.url, headers=_headers)
         if response.status_code == 200:
             return response.content
@@ -56,8 +56,22 @@ class DM5Comicat(WebsiteInterface):
         return image_list
 
     def chapter_callback(self, comic_info: ComicInfo, callback):
-        for chapter_info in comic_info['chapterList']:
-            callback(chapter_info)
+        if comic_info['chapterList']:
+            for item in comic_info['chapterList']:
+                callback(item)
+        else:
+            response = self.session.get(comic_info.url)
+            tree = etree.HTML(response.text)
+
+            alist: SelectorList = tree.xpath("//ul[@class='view-win-list detail-list-select']//li/a")
+            for a in alist:
+                a: Selector
+                chapter_info = ChapterInfo()
+                chapter_info.title = a.text.strip()
+                chapter_info.url = self.domain + a.attrib.get("href")
+                callback(chapter_info)
+                comic_info['chapterList'].append(chapter_info)
+
         return comic_info['chapterList']
 
     def search_callback(self, key, callback) -> list[ComicInfo]:

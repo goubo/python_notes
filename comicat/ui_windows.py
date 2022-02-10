@@ -18,7 +18,7 @@ class DownLoadTaskWidget(QWidget):
     def __init__(self, task: DownloadTask):
         super().__init__()
         self.task = task
-        task.widget = self
+        constant.download_task_widget_map[task.chapterInfo.url] = self
         self.setMinimumHeight(40)
         self.setMaximumHeight(40)
         self.groupBox = QGroupBox(self)
@@ -403,7 +403,10 @@ class MainWindowWidget(QWidget):
 
         self.souInput.returnPressed.connect(self.input_return_pressed)  # 回车搜索
 
-        self.load_comic_list_signa.connect(self.load_comic_list)  # 更新ui的插槽
+        self.load_comic_list_signa.connect(self.search_load_comic_list)  # 更新ui的插槽
+
+        self.bookshelf_load_comic_list()
+
     def stop_all_task(self):
         constant.SERVICE.stop_all_task()
 
@@ -426,7 +429,7 @@ class MainWindowWidget(QWidget):
         constant.SERVICE.search(self.souInput.text(), self.load_comic_list_signa.emit)  # 查询回调出发插槽
         self.tabWidget.setCurrentIndex(2)
 
-    def load_comic_list(self, info: ComicInfo):
+    def search_load_comic_list(self, info: ComicInfo):
         """
         解析的漫画信息,通过回调到本方法,加载页面
         :param info:
@@ -436,6 +439,11 @@ class MainWindowWidget(QWidget):
         if self.souInput.text() == info.searchKey:
             comic_info_widget = UIComicListWidget(info, self.tabWidget, self.downVBoxLayout)
             self.searchVBoxLayout.addWidget(comic_info_widget)
+
+    def bookshelf_load_comic_list(self):
+        for item in constant.downloaded_comic_map.values():
+            comic_info_widget = UIComicListWidget(item, self.tabWidget, self.downVBoxLayout)
+            self.bookshelfVBoxLayout.addWidget(comic_info_widget)
 
 
 class MainWindow(QMainWindow):
