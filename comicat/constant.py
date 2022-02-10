@@ -49,3 +49,7 @@ DB = shelve.open(os.path.join(file_path, 'userDB'))
 downloaded_task_map = DB['downloaded_task_map']
 download_task_map = DB['download_task_map']
 downloaded_comic_map = DB['downloaded_comic_map']
+
+# 配置
+
+down_path = '/Users/bo/my/tmp/comicat_down'

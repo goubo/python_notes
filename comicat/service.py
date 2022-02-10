@@ -73,7 +73,7 @@ class DownloadTask(object):
             return
         if self.status == 0 or self.status == 1:
             self.status = 1
-            file_path = os.path.join('/Users/bo/my/tmp/comicat_down', self.comicInfo.title, self.chapterInfo.title)
+            file_path = os.path.join(constant.down_path, self.comicInfo.title, self.chapterInfo.title)
             if not os.path.exists(file_path):
                 os.makedirs(file_path)
             for page in range(len(self.success) + len(self.error) + 1, len(self.imageInfos) + 1):
@@ -91,7 +91,7 @@ class DownloadTask(object):
             self.status = -2 if len(self.error) > 0 else -1
             constant.download_task_widget_map[self.chapterInfo.url].update_task(self)
         elif self.status == -2:  # 重试error列表
-            file_path = os.path.join('/Users/bo/my/tmp/comicat_down', self.comicInfo.title, self.chapterInfo.title)
+            file_path = os.path.join(constant.down_path, self.comicInfo.title, self.chapterInfo.title)
             if not os.path.exists(file_path):
                 os.makedirs(file_path)
             for k, v in self.error:
@@ -204,7 +204,6 @@ class Service(object):
             elif task.status == 2:
                 task.status = 0
             self.down_pool.submit(task.download_image_thread)
-
 
     def application_down(self):
         """
