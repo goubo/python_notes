@@ -23,22 +23,6 @@ def set_class_name(comic: ComicInfo, class_name, key, callback):
     callback(comic)
 
 
-def search_thread(k, callback):
-    """
-    搜索线程
-    如果缓存中有,直接返回,否则调用所有的mod,进行搜索
-    :param k: 关键字
-    :param callback:回调
-    :return:
-    """
-    if k in constant.temp:
-        for item in constant.temp.get(k):
-            callback(item)
-    else:
-        for key, value in constant.mod_dist.items():
-            constant.temp[k] = value.search_callback(k, lambda comic: set_class_name(comic, key, k, callback))
-
-
 def chapter_thread(comic_info: ComicInfo, callback):
     """
     解析章节的线程
@@ -134,13 +118,36 @@ class Service(object):
         self.down_pool = BoundedThreadPoolExecutor(max_workers=5)
         self.parse_pool = BoundedThreadPoolExecutor(max_workers=20)
 
+    def search_thread(self, k, callback):
+        """
+        搜索线程
+        如果缓存中有,直接返回,否则调用所有的mod,进行搜索
+        :param k: 关键字
+        :param callback:回调
+        :return:
+        """
+
+        def work_thread(class_name, _key, mod_server, _callback):
+            constant.temp[k] = mod_server.search_callback(_key, lambda comic: set_class_name(comic, class_name, _key,
+                                                                                             _callback))
+
+        if k in constant.temp:
+            for item in constant.temp.get(k):
+                callback(item)
+        else:
+            for key, value in constant.mod_dist.items():
+                try:
+                    self.parse_pool.submit(work_thread, key, k, value, callback)
+                except Exception as err:
+                    print(err)
+
     def search(self, k, callback):
         """
         搜索,提交到解析线程池中
         :param k: 搜索关键字
         :param callback:  回调函数,返回单个 @ComicInfo
         """
-        self.parse_pool.submit(search_thread, k, callback)
+        self.parse_pool.submit(self.search_thread, k, callback)
 
     def chapter(self, comic_info: ComicInfo, callback):
         """
