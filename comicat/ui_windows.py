@@ -228,6 +228,11 @@ class UIComicInfoWidget(QWidget):
         self.check_box_list.append(check_box)
         check_box.setText(chapter_info.title)
         check_box.setProperty("chapter_info", chapter_info)
+        task = constant.downloaded_task_map.get(chapter_info.url)
+        if task and task.status == -1:
+            check_box.setStyleSheet('color:red')
+            check_box.setChecked(True)
+
         self.searchVBoxLayout.addWidget(check_box)
         self.i += 1
 
@@ -397,6 +402,7 @@ class MainWindowWidget(QWidget):
         all_stop.setText("全部停止")
         clear_done = QPushButton()
         clear_done.setText("清理已完成")
+
         down_button_layout.addWidget(all_start)
         down_button_layout.addWidget(all_stop)
         down_button_layout.addWidget(clear_done)
@@ -406,9 +412,9 @@ class MainWindowWidget(QWidget):
         self.load_comic_list_signa.connect(self.search_load_comic_list)  # 更新ui的插槽
 
         self.bookshelf_load_comic_list()
+        self.download_callback()
 
-    def stop_all_task(self):
-        constant.SERVICE.stop_all_task()
+
 
     def tab_close(self, index):
         """
@@ -444,6 +450,12 @@ class MainWindowWidget(QWidget):
         for item in constant.downloaded_comic_map.values():
             comic_info_widget = UIComicListWidget(item, self.tabWidget, self.downVBoxLayout)
             self.bookshelfVBoxLayout.addWidget(comic_info_widget)
+
+    def download_callback(self):
+        for item in constant.downloaded_task_map.values():
+            widget = DownLoadTaskWidget(item)
+            widget.update_task(item)
+            self.downVBoxLayout.addWidget(widget)
 
 
 class MainWindow(QMainWindow):

@@ -114,6 +114,11 @@ class DownloadTask(object):
             constant.downloaded_comic_map[self.comicInfo.url] = self.comicInfo
 
 
+def stop_all_task():
+    for url, task in constant.download_task_map:
+        task.status = -3 if task.status == -2 else 2
+
+
 class Service(object):
     """
     业务主线程
@@ -200,9 +205,6 @@ class Service(object):
                 task.status = 0
             self.down_pool.submit(task.download_image_thread)
 
-    def stop_all_task(self):
-        for url, task in constant.download_task_map:
-            task.status = -3 if task.status == -2 else 2
 
     def application_down(self):
         """
