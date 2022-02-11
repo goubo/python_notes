@@ -67,7 +67,7 @@ def find_database_access_class(parent_module_name: str, module_dir: str, sub_cla
     modules = pkgutil.iter_modules([base_dir + "/" + module_dir])
     found_modules = []
     for x, sub_file_name, _ in modules:
-        module_name = parent_module_name + "." + sub_file_name
+        module_name = parent_module_name + "." + module_dir + "." + sub_file_name
         found_module = x.find_module(module_name).load_module(module_name)
         found_modules.append(found_module)
     found_type_a_modules = {}
