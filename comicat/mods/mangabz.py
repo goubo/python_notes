@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Optional
 
 import execjs
 import requests
@@ -102,7 +102,7 @@ class MangabzComicat(WebsiteInterface):
 
         return image_list
 
-    def down_image(self, image_info: ImageInfo) -> bytes:
+    def down_image(self, image_info: ImageInfo) -> Optional[bytes]:
         # _headers = self.headers.copy()
         # _headers['Referer'] = '{}{}'.format(self.domain, image_info['dm5Curl'])
         response = self.session.get(image_info.url, headers=self.headers)
