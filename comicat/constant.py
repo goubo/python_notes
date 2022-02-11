@@ -52,4 +52,4 @@ downloaded_comic_map = DB['downloaded_comic_map']
 
 # 配置
 
-down_path = '/Users/bo/my/tmp/comicat_down'
+down_path = os.path.join(os.path.expanduser('~'), 'Download', 'comicat_down')
