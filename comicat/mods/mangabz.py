@@ -52,7 +52,7 @@ class MangabzComicat(WebsiteInterface):
                     comic_info_list.append(info)
         return comic_info_list
 
-    def parse_chapter(self, tree, _cb):
+    def parse_chapter(self, tree, callback):
         chapter_list = []
         alist: SelectorList = tree.xpath("//div[@class='detail-list-form-con']/a")
         for a in alist:
@@ -61,8 +61,8 @@ class MangabzComicat(WebsiteInterface):
             chapter_info.title = a.text.strip()
             chapter_info.url = self.domain + a.attrib.get("href")
             chapter_list.append(chapter_info)
-            if _cb:
-                _cb(chapter_info)
+            if callback:
+                callback(chapter_info)
         return chapter_list
 
     def chapter_callback(self, comic_info: ComicInfo, callback) -> List[ChapterInfo]:
@@ -103,25 +103,8 @@ class MangabzComicat(WebsiteInterface):
         return image_list
 
     def down_image(self, image_info: ImageInfo) -> Optional[bytes]:
-        # _headers = self.headers.copy()
-        # _headers['Referer'] = '{}{}'.format(self.domain, image_info['dm5Curl'])
         response = self.session.get(image_info.url, headers=self.headers)
         if response.status_code == 200:
             return response.content
         else:
             return
-
-
-if __name__ == '__main__':
-    c = MangabzComicat()
-
-    # def test(info):
-    #     print(info['chapterList'][0].url)
-    #     print(info)
-    # c.search_callback('龙珠', test)
-
-    chapter_info = ChapterInfo()
-    chapter_info.url = "https://mangabz.com/m51565/"
-    il = c.parse_image_list(chapter_info)
-    for i in il:
-        print(i.url, len(c.down_image(i)))
