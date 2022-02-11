@@ -49,6 +49,8 @@ DB = shelve.open(os.path.join(file_path, 'userDB'))
 downloaded_task_map = DB['downloaded_task_map']
 download_task_map = DB['download_task_map']
 downloaded_comic_map = DB['downloaded_comic_map']
+mod_list = DB.get('mod_list') if DB.get('mod_list') else set()
+'''启用的mod列表'''
 
 # 配置
 

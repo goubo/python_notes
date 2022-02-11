@@ -135,9 +135,9 @@ class Service(object):
             for item in constant.temp.get(k):
                 callback(item)
         else:
-            for key, value in constant.mod_dist.items():
+            for mod_name in constant.mod_list:
                 try:
-                    self.parse_pool.submit(work_thread, key, k, value, callback)
+                    self.parse_pool.submit(work_thread, mod_name, k, constant.mod_dist[mod_name], callback)
                 except Exception as err:
                     print(err)
 
@@ -223,3 +223,4 @@ class Service(object):
         constant.DB['downloaded_task_map'] = constant.downloaded_task_map
         constant.DB['download_task_map'] = constant.download_task_map
         constant.DB['downloaded_comic_map'] = constant.downloaded_comic_map
+        constant.DB['mod_list'] = constant.mod_list

@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QGroupBox, QScrollArea
 
 import constant
 from entity import ComicInfo, ChapterInfo
-from extend_widgets import ButtonQLabel
+from extend_widgets import ButtonQLabel, CheckableComboBox
 from service import DownloadTask
 from util import image_resize
 
@@ -322,7 +322,7 @@ class MainWindowWidget(QWidget):
         self.centralWidget.setObjectName("centralWidget")
         # 搜索框
         self.souInput = QtWidgets.QLineEdit(self.centralWidget)
-        self.souInput.setGeometry(QtCore.QRect(40, 30, 944, 30))
+        self.souInput.setGeometry(QtCore.QRect(40, 30, 800, 30))
         font = QtGui.QFont()
         font.setPointSize(22)
         font.setKerning(True)
@@ -330,6 +330,15 @@ class MainWindowWidget(QWidget):
         self.souInput.setFont(font)
         self.souInput.setObjectName("souInput")
         self.souInput.setText("龙珠")
+
+        self.modBox = CheckableComboBox(self.centralWidget)
+        self.modBox.setGeometry(QtCore.QRect(850, 30, 120, 30))
+        for k in constant.mod_dist.keys():
+            if k in constant.mod_list:
+                self.modBox.addItem(QtCore.Qt.CheckState.Checked, k)
+            else:
+                self.modBox.addItem(QtCore.Qt.CheckState.Unchecked, k)
+
         # QTabWidget tab页签
         self.tabWidget = QtWidgets.QTabWidget(self.centralWidget)
         self.tabWidget.setGeometry(QtCore.QRect(40, 70, 944, 668))
@@ -414,8 +423,6 @@ class MainWindowWidget(QWidget):
         self.bookshelf_load_comic_list()
         self.download_callback()
 
-
-
     def tab_close(self, index):
         """
         关闭tab,删掉缓存的列表
@@ -432,8 +439,13 @@ class MainWindowWidget(QWidget):
         """
         for i in range(self.searchVBoxLayout.count()):  # 清理显示的内容
             self.searchVBoxLayout.itemAt(i).widget().deleteLater()
-        constant.SERVICE.search(self.souInput.text(), self.load_comic_list_signa.emit)  # 查询回调出发插槽
-        self.tabWidget.setCurrentIndex(2)
+        constant.mod_list.clear()
+        for i in range(self.modBox.count()):
+            if self.modBox.item_checked(i):
+                constant.mod_list.add(self.modBox.model().item(i).text())
+        if len(constant.mod_list) > 0:
+            constant.SERVICE.search(self.souInput.text(), self.load_comic_list_signa.emit)  # 查询回调出发插槽
+            self.tabWidget.setCurrentIndex(2)
 
     def search_load_comic_list(self, info: ComicInfo):
         """
