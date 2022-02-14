@@ -8,8 +8,6 @@ class WebsiteInterface(object):
     """
         单个网站的爬虫实现本接口
         class名称必须包括 Comicat 例如 Dm5Comicat , ComicatBilibili
-
-
     """
     __metaclass__ = ABCMeta  # 指定这是一个抽象类
 

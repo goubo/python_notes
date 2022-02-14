@@ -14,8 +14,7 @@ class ButtonQLabel(QtWidgets.QLabel):
 
 
 class CheckableComboBox(QtWidgets.QComboBox):
-    # once there is a checkState set, it is rendered
-    # here we assume default Unchecked
+    # 自定义的下拉框组件,支持多选
     def addItem(self, state, *__args):
         super(CheckableComboBox, self).addItem(*__args)
         item = self.model().item(self.count() - 1, 0)
