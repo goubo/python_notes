@@ -1,5 +1,7 @@
 # 漫画下载阅读器
 
+本项目单独提出到 : https://github.com/goubo/comicat
+
 基于pyqt6,
 
 `main.py` 进入,`ui_windows.py` 为 界面  
